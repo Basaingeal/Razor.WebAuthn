@@ -9,7 +9,7 @@
     "lint": "eslint ./src --ext .ts",
     "prettier:write": "prettier --write ./src/ts/*.ts",
     "prettier:check": "prettier --check ./src/ts/*.ts",
-    "babel": "babel ./src/ts/SweetAlert.ts --out-dir wwwroot --extensions .ts,.tsx"
+    "babel": "babel ./src/WebAuthn.ts --out-dir wwwroot --extensions .ts,.tsx"
   },
   "devDependencies": {
     "@babel/cli": "latest",
@@ -18,6 +18,7 @@
     "@babel/plugin-proposal-object-rest-spread": "latest",
     "@babel/preset-env": "latest",
     "@babel/preset-typescript": "latest",
+    "@types/node": "latest",
     "@typescript-eslint/eslint-plugin": "canary",
     "@typescript-eslint/parser": "canary",
     "babel-loader": "latest",
@@ -26,9 +27,10 @@
     "eslint": "latest",
     "eslint-config-prettier": "latest",
     "prettier": "latest",
+    "terser-webpack-plugin": "latest",
     "typescript": "next",
-    "webpack": "next",
-    "webpack-cli": "4.0.0.0-alpha-5"
+    "webpack": "latest",
+    "webpack-cli": "latest"
   },
   "author": "Michael J. Currie",
   "private": true,
@@ -41,5 +43,8 @@
     "edge 18",
     "firefox 60",
     "opera 54"
-  ]
+  ],
+  "dependencies": {
+    "core-js": "^3.1.4"
+  }
 }

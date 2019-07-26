@@ -1,9 +1,11 @@
 ﻿const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const TerserJSPlugin = require("terser-webpack-plugin");
 
 module.exports = {
   entry: {
     webAuthn: "./src/WebAuthn.ts",
+    "webAuthn.min": "./src/WebAuthn.ts",
   },
   output: {
     filename: "[name].js",
@@ -22,6 +24,10 @@ module.exports = {
     new CleanWebpackPlugin()
   ],
   optimization: {
-    
+    minimizer: [
+      new TerserJSPlugin({
+        include: /\.min\.js$/
+      })
+    ]
   }
 };
