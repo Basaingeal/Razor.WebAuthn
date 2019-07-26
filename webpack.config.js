@@ -1,28 +1,26 @@
-﻿const path = require("path");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const TerserJSPlugin = require("terser-webpack-plugin");
+﻿const path = require('path')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const TerserJSPlugin = require('terser-webpack-plugin')
 
 module.exports = {
   entry: {
-    webAuthn: "./src/WebAuthn.ts",
-    "webAuthn.min": "./src/WebAuthn.ts",
+    webAuthn: './src/WebAuthn.ts',
+    'webAuthn.min': './src/WebAuthn.ts'
   },
   output: {
-    filename: "[name].js",
-    path: path.resolve(__dirname, "wwwroot")
+    filename: '[name].js',
+    path: path.resolve(__dirname, 'wwwroot')
   },
   module: {
     rules: [
       {
         test: /\.ts$/,
-        use: "babel-loader",
+        use: 'babel-loader',
         exclude: /node_modules/
       }
     ]
   },
-  plugins: [
-    new CleanWebpackPlugin()
-  ],
+  plugins: [new CleanWebpackPlugin()],
   optimization: {
     minimizer: [
       new TerserJSPlugin({
@@ -30,4 +28,4 @@ module.exports = {
       })
     ]
   }
-};
+}

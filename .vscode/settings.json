@@ -1,3 +1,7 @@
 {
-  "tslint.exclude": ["**/*.ts", "**/*.tsx"]
+  "tslint.exclude": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }

@@ -1,18 +1,23 @@
-module.exports = function(api) {
-  api.cache(true);
+module.exports = function (api) {
+  api.cache(true)
 
   const presets = [
     [
-      "@babel/preset-env",
+      '@babel/preset-env',
       {
-        useBuiltIns: "usage",
-        corejs: 3
+        useBuiltIns: 'usage',
+        corejs: 3,
+        debug: true,
+        exclude: ['es.promise']
       }
     ],
-    "@babel/preset-typescript"
-  ];
+    '@babel/preset-typescript'
+  ]
 
-  const plugins = ["@babel/proposal-class-properties", "@babel/proposal-object-rest-spread"];
+  const plugins = [
+    '@babel/proposal-class-properties',
+    '@babel/proposal-object-rest-spread'
+  ]
 
-  return { presets, plugins };
-};
+  return { presets, plugins }
+}

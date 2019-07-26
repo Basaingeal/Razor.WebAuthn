@@ -14,4 +14,4 @@ module.exports = {
     'prettier',
     'prettier/@typescript-eslint'
   ]
-};
+}
