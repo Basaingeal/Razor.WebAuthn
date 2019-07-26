@@ -1,0 +1,45 @@
+{
+  "name": "currietechnologies-razorwebauthn",
+  "version": "0.1.0",
+  "description": "A Razor class library for interacting with the browser WebAuthn API.",
+  "scripts": {
+    "build": "SET NODE_ENV=production && webpack -p --color",
+    "build:tsc": "tsc",
+    "watch": "webpack --watch",
+    "lint": "eslint ./src --ext .ts",
+    "prettier:write": "prettier --write ./src/ts/*.ts",
+    "prettier:check": "prettier --check ./src/ts/*.ts",
+    "babel": "babel ./src/ts/SweetAlert.ts --out-dir wwwroot --extensions .ts,.tsx"
+  },
+  "devDependencies": {
+    "@babel/cli": "latest",
+    "@babel/core": "latest",
+    "@babel/plugin-proposal-class-properties": "latest",
+    "@babel/plugin-proposal-object-rest-spread": "latest",
+    "@babel/preset-env": "latest",
+    "@babel/preset-typescript": "latest",
+    "@typescript-eslint/eslint-plugin": "canary",
+    "@typescript-eslint/parser": "canary",
+    "babel-loader": "latest",
+    "clean-webpack-plugin": "latest",
+    "css-loader": "latest",
+    "eslint": "latest",
+    "eslint-config-prettier": "latest",
+    "prettier": "latest",
+    "typescript": "next",
+    "webpack": "next",
+    "webpack-cli": "4.0.0.0-alpha-5"
+  },
+  "author": "Michael J. Currie",
+  "private": true,
+  "eslintIgnore": [
+    "*.js",
+    "*.ts"
+  ],
+  "browserslist": [
+    "chrome 67",
+    "edge 18",
+    "firefox 60",
+    "opera 54"
+  ]
+}
