@@ -1,3 +1,5 @@
+import { removeEmpty, arrayBufferFromString } from "./UtilityFunctions";
+
 declare type AttestationConveyancePreferenceEnum = AttestationConveyancePreference | 0 | 1 | 2;
 declare type AuthenticatorAttachmentEnum = AuthenticatorAttachment | 0 | 1;
 declare type AuthenticatorTransportEnum = AuthenticatorTransport | 0 | 1 | 2 | 3;
@@ -6,23 +8,6 @@ declare type PublicKeyCredentialTypeEnum = PublicKeyCredentialType | 0;
 declare type UserVerificationRequirementEnum = UserVerificationRequirement | 0 | 1 | 2;
 
 declare type ArrayBufferString = ArrayBuffer | string;
-
-/*eslint-disable @typescript-eslint/no-explicit-any */
-const removeEmpty = (obj: any): void =>
-  // Object.fromEntries(
-  //   Object.entries(obj)
-  //     .filter(([, v]): boolean => v != null)
-  //     .map(([k, v]): [string, unknown] => (typeof v === "object" ? [k, removeEmpty(v)] : [k, v]))
-  // );
-  Object.keys(obj).forEach((key): void => {
-    if (obj[key] && typeof obj[key] === "object") removeEmpty(obj[key]);
-    else if (obj[key] == null) delete obj[key];
-  });
-/*eslint-enable @typescript-eslint/no-explicit-any */
-
-const arrayBufferFromString = (input: string): ArrayBuffer => {
-  return Uint8Array.from(atob(input), (c): number => c.charCodeAt(0));
-};
 
 const authenticatorTransportIntToString = (at: AuthenticatorTransport): AuthenticatorTransport => {
   switch (at as AuthenticatorTransportEnum) {
