@@ -95,6 +95,8 @@ currieWebAuthn.Create = async (
   requestId: string,
   options?: CredentialCreationOptions
 ): Promise<void> => {
+  console.log(options);
+  
   if (options && options.publicKey) {
     fixPublicKeyCredentialCreationOptions(options.publicKey);
   }

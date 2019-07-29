@@ -5,14 +5,24 @@ declare type CredentialMediationRequirementEnum = CredentialMediationRequirement
 declare type PublicKeyCredentialTypeEnum = PublicKeyCredentialType | 0;
 declare type UserVerificationRequirementEnum = UserVerificationRequirement | 0 | 1 | 2;
 
+declare type ArrayBufferString = ArrayBuffer | string;
+
 /*eslint-disable @typescript-eslint/no-explicit-any */
-const removeEmpty = (obj: any): any =>
-  Object.fromEntries(
-    Object.entries(obj)
-      .filter(([, v]): boolean => v != null)
-      .map(([k, v]): [string, unknown] => (typeof v === "object" ? [k, removeEmpty(v)] : [k, v]))
-  );
+const removeEmpty = (obj: any): void =>
+  // Object.fromEntries(
+  //   Object.entries(obj)
+  //     .filter(([, v]): boolean => v != null)
+  //     .map(([k, v]): [string, unknown] => (typeof v === "object" ? [k, removeEmpty(v)] : [k, v]))
+  // );
+  Object.keys(obj).forEach((key): void => {
+    if (obj[key] && typeof obj[key] === "object") removeEmpty(obj[key]);
+    else if (obj[key] == null) delete obj[key];
+  });
 /*eslint-enable @typescript-eslint/no-explicit-any */
+
+const arrayBufferFromString = (input: string): ArrayBuffer => {
+  return Uint8Array.from(atob(input), (c): number => c.charCodeAt(0));
+};
 
 const authenticatorTransportIntToString = (at: AuthenticatorTransport): AuthenticatorTransport => {
   switch (at as AuthenticatorTransportEnum) {
@@ -102,7 +112,21 @@ const credentialMediationRequirementIntToString = (
   return "optional";
 };
 
+const publicKeyCredentialTypeIntToString = (
+  pkct: PublicKeyCredentialType
+): PublicKeyCredentialType => {
+  switch (pkct as PublicKeyCredentialTypeEnum) {
+    case 0: {
+      return "public-key";
+    }
+  }
+
+  return "public-key";
+};
+
 const fixPublicKeyCredentialDescriptor = (pkcd: PublicKeyCredentialDescriptor): void => {
+  pkcd.id = arrayBufferFromString((pkcd.id as ArrayBufferString) as string);
+
   if (pkcd.transports) {
     pkcd.transports.forEach((at, index): void => {
       if (pkcd.transports) {
@@ -111,39 +135,47 @@ const fixPublicKeyCredentialDescriptor = (pkcd: PublicKeyCredentialDescriptor): 
     });
   }
 
-  let typeEnum = pkcd.type as PublicKeyCredentialTypeEnum;
-  switch (typeEnum) {
-    case 0: {
-      typeEnum = "public-key";
-    }
-  }
-  pkcd.type = typeEnum;
+  pkcd.type = publicKeyCredentialTypeIntToString(pkcd.type);
 };
 
 export const fixPublicKeyCredentialCreationOptions = (
   options: PublicKeyCredentialCreationOptions
 ): PublicKeyCredentialCreationOptions => {
-  options = removeEmpty(options);
+  removeEmpty(options);
   if (options.authenticatorSelection) {
-    if (options.authenticatorSelection.authenticatorAttachment) {
+    if (options.authenticatorSelection.authenticatorAttachment != null) {
       options.authenticatorSelection.authenticatorAttachment = authenticatorAttachmentIntToString(
         options.authenticatorSelection.authenticatorAttachment
       );
     }
 
-    if (options.authenticatorSelection.userVerification) {
+    if (options.authenticatorSelection.userVerification != null) {
       options.authenticatorSelection.userVerification = userVerificationRequirementIntToString(
         options.authenticatorSelection.userVerification
       );
     }
   }
 
-  if (options.attestation) {
+  if (options.attestation != null) {
     options.attestation = attestationConveyancePreferenceIntToString(options.attestation);
   }
 
   if (options.excludeCredentials) {
     options.excludeCredentials.forEach(fixPublicKeyCredentialDescriptor);
+  }
+
+  options.challenge = arrayBufferFromString((options.challenge as ArrayBufferString) as string);
+
+  options.pubKeyCredParams.forEach((pkcp): void => {
+    pkcp.type = publicKeyCredentialTypeIntToString(pkcp.type);
+  });
+
+  options.user.id = arrayBufferFromString((options.user.id as ArrayBufferString) as string);
+
+  if (options.extensions && options.extensions.authnSel) {
+    options.extensions.authnSel = options.extensions.authnSel.map(
+      (authSel): ArrayBuffer => arrayBufferFromString((authSel as ArrayBufferString) as string)
+    );
   }
 
   return options;
@@ -152,13 +184,13 @@ export const fixPublicKeyCredentialCreationOptions = (
 export const fixPublicKeyCredentialRequestOptions = (
   options: PublicKeyCredentialRequestOptions
 ): PublicKeyCredentialRequestOptions => {
-  options = removeEmpty(options);
+  removeEmpty(options);
 
   if (options.allowCredentials) {
     options.allowCredentials.forEach(fixPublicKeyCredentialDescriptor);
   }
 
-  if (options.userVerification) {
+  if (options.userVerification != null) {
     options.userVerification = userVerificationRequirementIntToString(options.userVerification);
   }
 
@@ -172,7 +204,7 @@ export const fixCredentialRequestOptions = (
     fixPublicKeyCredentialRequestOptions(options.publicKey);
   }
 
-  if (options.mediation) {
+  if (options.mediation != null) {
     options.mediation = credentialMediationRequirementIntToString(options.mediation);
   }
 
