@@ -123,7 +123,7 @@ const fixPublicKeyCredentialDescriptor = (pkcd: PublicKeyCredentialDescriptor): 
   pkcd.type = publicKeyCredentialTypeIntToString(pkcd.type);
 };
 
-export const fixPublicKeyCredentialCreationOptions = (
+const fixPublicKeyCredentialCreationOptions = (
   options: PublicKeyCredentialCreationOptions
 ): PublicKeyCredentialCreationOptions => {
   removeEmpty(options);
@@ -166,10 +166,22 @@ export const fixPublicKeyCredentialCreationOptions = (
   return options;
 };
 
+export const fixCredentialCreationOptions = (
+  options: CredentialCreationOptions
+): CredentialCreationOptions => {
+  if (options.publicKey) {
+    fixPublicKeyCredentialCreationOptions(options.publicKey);
+  }
+
+  return options;
+};
+
 export const fixPublicKeyCredentialRequestOptions = (
   options: PublicKeyCredentialRequestOptions
 ): PublicKeyCredentialRequestOptions => {
   removeEmpty(options);
+
+  options.challenge = arrayBufferFromString((options.challenge as ArrayBufferString) as string);
 
   if (options.allowCredentials) {
     options.allowCredentials.forEach(fixPublicKeyCredentialDescriptor);
@@ -177,6 +189,12 @@ export const fixPublicKeyCredentialRequestOptions = (
 
   if (options.userVerification != null) {
     options.userVerification = userVerificationRequirementIntToString(options.userVerification);
+  }
+
+  if (options.extensions && options.extensions.authnSel) {
+    options.extensions.authnSel = options.extensions.authnSel.map(
+      (authSel): ArrayBuffer => arrayBufferFromString((authSel as ArrayBufferString) as string)
+    );
   }
 
   return options;
