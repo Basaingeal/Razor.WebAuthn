@@ -17,6 +17,8 @@ namespace CurrieTechnologies.Razor.WebAuthn
             new Dictionary<Guid, TaskCompletionSource<Credential?>>();
         private static readonly Dictionary<Guid, TaskCompletionSource<object>> pendingPreventSilentAccessRequests =
             new Dictionary<Guid, TaskCompletionSource<object>>();
+        private static readonly Dictionary<Guid, TaskCompletionSource<bool>> pendingIsUserVerifyingPlatformAuthenticatorAvailableRequests =
+            new Dictionary<Guid, TaskCompletionSource<bool>>();
 
         public CredentialsContainer(IJSRuntime jSRuntime)
         {
@@ -31,7 +33,15 @@ namespace CurrieTechnologies.Razor.WebAuthn
             await jSRuntime
                 .InvokeAsync<object>($"{jsNamespace}.Get", requestId, options)
                 .ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
+            var credential = await tcs.Task.ConfigureAwait(false);
+            SetupCredential(credential, requestId);
+
+            if(options?.PublicKey != null)
+            {
+                return credential as PublicKeyCredential;
+            }
+
+            return credential;
         }
 
         [JSInvokable]
@@ -52,7 +62,9 @@ namespace CurrieTechnologies.Razor.WebAuthn
             await jSRuntime
                 .InvokeAsync<object>($"{jsNamespace}.Store", requestId, credential)
                 .ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
+            var storedCredential = await tcs.Task.ConfigureAwait(false);
+            SetupCredential(storedCredential, requestId);
+            return storedCredential;
         }
 
         [JSInvokable]
@@ -73,7 +85,9 @@ namespace CurrieTechnologies.Razor.WebAuthn
             await jSRuntime
                 .InvokeAsync<object>($"{jsNamespace}.Create", requestId, options)
                 .ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
+            var credential = await tcs.Task.ConfigureAwait(false);
+            SetupCredential(credential, requestId);
+            return credential;
         }
 
         [JSInvokable]
@@ -84,6 +98,18 @@ namespace CurrieTechnologies.Razor.WebAuthn
             tcs.SetResult(credential);
             pendingCreateRequests.Remove(requestGuid);
             return Task.CompletedTask;
+        }
+
+        private void SetupCredential(Credential? credential, Guid requestGuid)
+        {
+            switch (credential)
+            {
+                case PublicKeyCredential publicKeyCredential:
+                    {
+                        publicKeyCredential.Setup(this.jSRuntime, requestGuid);
+                        break;
+                    }
+            }
         }
 
         public async Task PreventSilentAccessAsync()
@@ -104,6 +130,27 @@ namespace CurrieTechnologies.Razor.WebAuthn
             pendingPreventSilentAccessRequests.TryGetValue(requestGuid, out TaskCompletionSource<object> tcs);
             tcs.SetResult(new { });
             pendingPreventSilentAccessRequests.Remove(requestGuid);
+            return Task.CompletedTask;
+        }
+
+        public async Task<bool> IsUserVerifyingPlatformAuthenticatorAvailableAsync()
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            var requestId = Guid.NewGuid();
+            pendingIsUserVerifyingPlatformAuthenticatorAvailableRequests.Add(requestId, tcs);
+            await jSRuntime
+                .InvokeAsync<bool>($"{jsNamespace}.IsUserVerifyingPlatformAuthenticatorAvailable", requestId)
+                .ConfigureAwait(false);
+            return await tcs.Task.ConfigureAwait(false);
+        }
+
+        [JSInvokable]
+        public static Task ReceiveIsUserVerifyingPlatformAuthenticatorAvailableResponse(string requestId, bool response)
+        {
+            var requestGuid = Guid.Parse(requestId);
+            pendingIsUserVerifyingPlatformAuthenticatorAvailableRequests.TryGetValue(requestGuid, out TaskCompletionSource<bool> tcs);
+            tcs.SetResult(response);
+            pendingIsUserVerifyingPlatformAuthenticatorAvailableRequests.Remove(requestGuid);
             return Task.CompletedTask;
         }
     }

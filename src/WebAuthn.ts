@@ -13,10 +13,16 @@ declare global {
   }
 }
 
+declare interface AuthenticatorAttestationResponse extends AuthenticatorResponse {
+  getTransports: () => AuthenticatorTransport[];
+}
+
 const namespace = "CurrieTechnologies.Razor.WebAuthn";
 window.CurrieTechnologies = window.CurrieTechnologies || {};
 window.CurrieTechnologies.Razor = window.CurrieTechnologies.Razor || {};
 window.CurrieTechnologies.Razor.WebAuthn = window.CurrieTechnologies.Razor.WebAuthn || {};
+
+const credentialStore: Map<string, Credential> = new Map<string, Credential>();
 
 const dispatchGetCredential = async (
   requestId: string,
@@ -43,6 +49,18 @@ const dispatchPreventSilentAccess = async (requestId: string): Promise<void> => 
   await DotNet.invokeMethodAsync(namespace, "ReceivePreventSilentAccessResponse", requestId);
 };
 
+const dispatchIsUserVerifyingPlatformAuthenticatorAvailable = async (
+  requestId: string,
+  result: boolean
+): Promise<void> => {
+  await DotNet.invokeMethodAsync(
+    namespace,
+    "ReceiveIsUserVerifyingPlatformAuthenticatorAvailableResponse",
+    requestId,
+    result
+  );
+};
+
 const currieWebAuthn = window.CurrieTechnologies.Razor.WebAuthn;
 
 currieWebAuthn.Get = async (
@@ -50,11 +68,19 @@ currieWebAuthn.Get = async (
   options?: CredentialRequestOptions
 ): Promise<void> => {
   const credential = await window.navigator.credentials.get(options);
+
+  if (credential) {
+    credentialStore.set(requestId, credential);
+  }
+
   await dispatchGetCredential(requestId, credential);
 };
 
 currieWebAuthn.Store = async (requestId: string, credential: Credential): Promise<void> => {
   const storedCredential = await window.navigator.credentials.store(credential);
+
+  credentialStore.set(requestId, storedCredential);
+
   await dispatchStoreCredential(requestId, storedCredential);
 };
 
@@ -63,10 +89,44 @@ currieWebAuthn.Create = async (
   options?: CredentialCreationOptions
 ): Promise<void> => {
   const credential = await window.navigator.credentials.create(options);
+
+  if (credential) {
+    credentialStore.set(requestId, credential);
+  }
+
   await dispatchCreateCredential(requestId, credential);
 };
 
 currieWebAuthn.PreventSilentAccess = async (requestId: string): Promise<void> => {
   await window.navigator.credentials.preventSilentAccess();
   await dispatchPreventSilentAccess(requestId);
+};
+
+currieWebAuthn.IsUserVerifyingPlatformAuthenticatorAvailable = async (
+  requestId: string
+): Promise<void> => {
+  const result = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  await dispatchIsUserVerifyingPlatformAuthenticatorAvailable(requestId, result);
+};
+
+currieWebAuthn.GetClientExtensionResults = (
+  clientSideId: string
+): AuthenticationExtensionsClientOutputs => {
+  const credential = credentialStore.get(clientSideId);
+  if (credential) {
+    const pkCredential = credential as PublicKeyCredential;
+    return pkCredential.getClientExtensionResults();
+  }
+  return {};
+};
+
+currieWebAuthn.GetTransports = (clientSideId: string): AuthenticatorTransport[] => {
+  const credential = credentialStore.get(clientSideId);
+  if (credential) {
+    const pkCredential = credential as PublicKeyCredential;
+    const authenticatorAttestationResponse = pkCredential.response as AuthenticatorAttestationResponse;
+    return authenticatorAttestationResponse.getTransports();
+  }
+
+  return [];
 };

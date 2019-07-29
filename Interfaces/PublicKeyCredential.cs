@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Threading.Tasks;
 
-namespace CurrieTechnologies.Razor.WebAuthn.Models
+namespace CurrieTechnologies.Razor.WebAuthn
 {
     public abstract class PublicKeyCredential : Credential
     {
@@ -11,14 +12,27 @@ namespace CurrieTechnologies.Razor.WebAuthn.Models
 
         public AuthenticatorResponse Response { get; internal set; }
 
-        public AuthenticationExtensionsClientOutputs GetClientExtensionResults()
+        private IJSRuntime JSRuntime { get; set; }
+        private Guid ClientSideId { get; set; }
+        private const string jsNamespace = "CurrieTechnologies.Razor.WebAuthn";
+
+        internal void Setup(IJSRuntime jSRuntime, Guid guid)
         {
-            throw new NotImplementedException();
+            this.JSRuntime = jSRuntime;
+            this.ClientSideId = guid;
+            switch(Response)
+            {
+                case AuthenticatorAttestationResponse aar: {
+                        aar.Setup(jSRuntime, guid);
+                        break;
+                    }
+            }
         }
 
-        public static Task<bool> IsUserVerifyingPlatformAuthenticatorAvailable()
+
+        public Task<AuthenticationExtensionsClientOutputs> GetClientExtensionResultsAsync()
         {
-            throw new NotImplementedException();
+            return this.JSRuntime.InvokeAsync<AuthenticationExtensionsClientOutputs>($"{jsNamespace}.GetClientExtensionResults", ClientSideId);
         }
     }
 }

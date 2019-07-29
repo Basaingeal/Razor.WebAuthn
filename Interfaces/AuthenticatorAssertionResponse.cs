@@ -1,6 +1,6 @@
 ﻿namespace CurrieTechnologies.Razor.WebAuthn
 {
-    public class AuthenticatorAssertionResponse
+    public class AuthenticatorAssertionResponse : AuthenticatorResponse
     {
 #pragma warning disable CA1819 // Properties should not return arrays
         public byte[] AuthenticatorData { get; internal set; }

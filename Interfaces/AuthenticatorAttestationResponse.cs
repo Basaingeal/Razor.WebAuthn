@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CurrieTechnologies.Razor.WebAuthn
 {
@@ -8,9 +10,20 @@ namespace CurrieTechnologies.Razor.WebAuthn
 #pragma warning disable CA1819 // Properties should not return arrays
         public byte[] AttestationObject { get; internal set; }
 #pragma warning restore CA1819 // Properties should not return arrays
-        public IEnumerable<AuthenticatorTransport> GetTransports()
+
+        private IJSRuntime JSRuntime { get; set; }
+        private Guid ClientSideId { get; set; }
+        private const string jsNamespace = "CurrieTechnologies.Razor.WebAuthn";
+
+        internal void Setup(IJSRuntime jSRuntime, Guid guid)
         {
-            throw new NotImplementedException();
+            this.JSRuntime = jSRuntime;
+            this.ClientSideId = guid;
+        }
+
+        public Task<IEnumerable<AuthenticatorTransport>> GetTransportsAsync()
+        {
+            return this.JSRuntime.InvokeAsync<IEnumerable<AuthenticatorTransport>>($"{jsNamespace}.GetTransports", ClientSideId);
         }
     }
 }
