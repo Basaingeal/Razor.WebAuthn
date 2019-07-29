@@ -1,5 +1,6 @@
 ﻿import DotNetInterop from "./DotNetInterop";
 import WebAuthnInterop from "./WebAuthnInterop";
+import { fixPublicKeyCredentialCreationOptions, fixCredentialRequestOptions } from "./ObjectFixes";
 
 declare const DotNet: DotNetInterop;
 
@@ -67,6 +68,12 @@ currieWebAuthn.Get = async (
   requestId: string,
   options?: CredentialRequestOptions
 ): Promise<void> => {
+  if (options) {
+    fixCredentialRequestOptions(options);
+  }
+
+  console.log(options);
+
   const credential = await window.navigator.credentials.get(options);
 
   if (credential) {
@@ -88,6 +95,12 @@ currieWebAuthn.Create = async (
   requestId: string,
   options?: CredentialCreationOptions
 ): Promise<void> => {
+  if (options && options.publicKey) {
+    fixPublicKeyCredentialCreationOptions(options.publicKey);
+  }
+
+  console.log(options);
+
   const credential = await window.navigator.credentials.create(options);
 
   if (credential) {

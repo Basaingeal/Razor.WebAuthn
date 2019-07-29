@@ -8,7 +8,7 @@ module.exports = function (api) {
         useBuiltIns: 'usage',
         corejs: 3,
         debug: true,
-        exclude: ['es.promise']
+        // exclude: ['es.promise']
       }
     ],
     '@babel/preset-typescript'

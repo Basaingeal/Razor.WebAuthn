@@ -27,5 +27,8 @@ module.exports = {
         include: /\.min\.js$/
       })
     ]
+  },
+  resolve: {
+    extensions: [".ts", ".js"]
   }
 }

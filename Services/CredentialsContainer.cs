@@ -35,21 +35,15 @@ namespace CurrieTechnologies.Razor.WebAuthn
                 .ConfigureAwait(false);
             var credential = await tcs.Task.ConfigureAwait(false);
             SetupCredential(credential, requestId);
-
-            if(options?.PublicKey != null)
-            {
-                return credential as PublicKeyCredential;
-            }
-
             return credential;
         }
 
         [JSInvokable]
-        public static Task ReceiveGetResponse(string requestId, Credential? credential)
+        public static Task ReceiveGetResponse(string requestId, AssertionPublicKeyCredential? credential)
         {
             var requestGuid = Guid.Parse(requestId);
             pendingGetRequests.TryGetValue(requestGuid, out TaskCompletionSource<Credential?> tcs);
-            tcs.SetResult(credential);
+            tcs.SetResult(credential as PublicKeyCredential);
             pendingGetRequests.Remove(requestGuid);
             return Task.CompletedTask;
         }
@@ -91,11 +85,11 @@ namespace CurrieTechnologies.Razor.WebAuthn
         }
 
         [JSInvokable]
-        public static Task ReceiveCreateResponse(string requestId, Credential? credential)
+        public static Task ReceiveCreateResponse(string requestId, AttestationPublicKeyCredential? credential)
         {
             var requestGuid = Guid.Parse(requestId);
             pendingCreateRequests.TryGetValue(requestGuid, out TaskCompletionSource<Credential?> tcs);
-            tcs.SetResult(credential);
+            tcs.SetResult(credential as PublicKeyCredential);
             pendingCreateRequests.Remove(requestGuid);
             return Task.CompletedTask;
         }
