@@ -28,7 +28,7 @@
     "eslint-config-prettier": "latest",
     "prettier": "latest",
     "terser-webpack-plugin": "latest",
-    "typescript": "next",
+    "typescript": "^3.6.0-dev.20190730",
     "webpack": "latest",
     "webpack-cli": "latest"
   },

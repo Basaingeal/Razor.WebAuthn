@@ -133,7 +133,7 @@ namespace CurrieTechnologies.Razor.WebAuthn
             var requestId = Guid.NewGuid();
             pendingIsUserVerifyingPlatformAuthenticatorAvailableRequests.Add(requestId, tcs);
             await jSRuntime
-                .InvokeAsync<bool>($"{jsNamespace}.IsUserVerifyingPlatformAuthenticatorAvailable", requestId)
+                .InvokeAsync<object>($"{jsNamespace}.IsUserVerifyingPlatformAuthenticatorAvailable", requestId)
                 .ConfigureAwait(false);
             return await tcs.Task.ConfigureAwait(false);
         }
