@@ -42,7 +42,8 @@
     "chrome 67",
     "edge 18",
     "firefox 60",
-    "opera 54"
+    "opera 54",
+    "safari 13"
   ],
   "dependencies": {
     "core-js": "^3.1.4"
