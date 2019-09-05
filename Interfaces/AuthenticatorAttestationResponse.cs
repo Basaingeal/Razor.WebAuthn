@@ -23,7 +23,7 @@ namespace CurrieTechnologies.Razor.WebAuthn
 
         public Task<IEnumerable<AuthenticatorTransport>> GetTransportsAsync()
         {
-            return this.JSRuntime.InvokeAsync<IEnumerable<AuthenticatorTransport>>($"{jsNamespace}.GetTransports", ClientSideId);
+            return this.JSRuntime.InvokeAsync<IEnumerable<AuthenticatorTransport>>($"{jsNamespace}.GetTransports", ClientSideId).AsTask();
         }
     }
 }

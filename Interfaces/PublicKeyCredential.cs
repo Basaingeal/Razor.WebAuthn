@@ -32,7 +32,7 @@ namespace CurrieTechnologies.Razor.WebAuthn
 
         public Task<AuthenticationExtensionsClientOutputs> GetClientExtensionResultsAsync()
         {
-            return this.JSRuntime.InvokeAsync<AuthenticationExtensionsClientOutputs>($"{jsNamespace}.GetClientExtensionResults", ClientSideId);
+            return this.JSRuntime.InvokeAsync<AuthenticationExtensionsClientOutputs>($"{jsNamespace}.GetClientExtensionResults", ClientSideId).AsTask();
         }
     }
 }
